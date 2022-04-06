@@ -7,6 +7,11 @@ import tensorflow as tf
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt  # Для отображения
+
+from keras.layers import Dropout
+from keras.layers import BatchNormalization
+
+
 case = int(input('Обучить - 1, Проверить - 2 , Свое - 3 :'))
 if case == 1:
     (X_train, y_train), (X_valid, y_valid) = mnist.load_data()
@@ -48,16 +53,34 @@ if case == 1:
     # model.fit(X_train, y_train, batch_size=128, epochs=200, verbose=1, validation_data=(X_valid, y_valid))
 
     # Обучение порядка 30 сек. Точность 97%
+    # model = Sequential()
+    # model.add(Dense(64, activation='relu', input_shape=(784,)))
+    # model.add(Dense(64, activation='relu'))
+    # model.add(Dense(10, activation='softmax'))
+    #
+    # model.compile(loss='categorical_crossentropy', optimizer=tf.keras.optimizers.SGD(lr=0.1), metrics=['accuracy'])
+    # model.fit(X_train, y_train, batch_size=128, epochs=20, verbose=1, validation_data=(X_valid, y_valid))
+
     model = Sequential()
+
     model.add(Dense(64, activation='relu', input_shape=(784,)))
+    model.add(BatchNormalization())  # преобразование пакетной нормализации активаций из предыдущего слоя
+
     model.add(Dense(64, activation='relu'))
+    model.add(BatchNormalization())
+
+    model.add(Dense(64, activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.2))  # отключающее одну пятую (0.2) нейронов в каждом цикле обучения
+
     model.add(Dense(10, activation='softmax'))
 
-    model.compile(loss='categorical_crossentropy', optimizer=tf.keras.optimizers.SGD(lr=0.1), metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     model.fit(X_train, y_train, batch_size=128, epochs=20, verbose=1, validation_data=(X_valid, y_valid))
 
+
     # Сохранение обученной сети
-    model.save('ai_int_200_relu.h5')
+    model.save('ai_int_200_deep.h5')
 if case == 2:
     n = 4  # Номер элемента для проверки
     _, (X_valid, y_valid) = mnist.load_data()
@@ -75,7 +98,7 @@ if case == 2:
     print(f'{y_it} - Это цифра - {res.index(max(res))}')
 
 if case == 3:
-    model = keras.models.load_model('ai_int_200_relu.h5')
+    model = keras.models.load_model('ai_int_200_deep.h5')
     for i in range(10):
         your_image = f'num/{i}.png'
         # grayscale_image = cv2.imread(your_image, 0)
