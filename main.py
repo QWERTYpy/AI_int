@@ -38,16 +38,26 @@ if case == 1:
     y_valid = to_categorical(y_valid, n_classes)
 
     # каждый слой сети последовательно (sequential) передает информацию только следующему слою
-    model = Sequential()
-    model.add(Dense(64, activation='sigmoid', input_shape=(784,)))
-    model.add(Dense(10, activation='softmax'))
+    # Обучение занимает 4 минуты. Точность 86%
+    # model = Sequential()
+    # model.add(Dense(64, activation='sigmoid', input_shape=(784,)))
+    # model.add(Dense(10, activation='softmax'))
 
     # Обучение
-    model.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.SGD(lr=0.01), metrics=['accuracy'])
-    model.fit(X_train, y_train, batch_size=128, epochs=200, verbose=1, validation_data=(X_valid, y_valid))
+    # model.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.SGD(lr=0.01), metrics=['accuracy'])
+    # model.fit(X_train, y_train, batch_size=128, epochs=200, verbose=1, validation_data=(X_valid, y_valid))
+
+    # Обучение порядка 30 сек. Точность 97%
+    model = Sequential()
+    model.add(Dense(64, activation='relu', input_shape=(784,)))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(10, activation='softmax'))
+
+    model.compile(loss='categorical_crossentropy', optimizer=tf.keras.optimizers.SGD(lr=0.1), metrics=['accuracy'])
+    model.fit(X_train, y_train, batch_size=128, epochs=20, verbose=1, validation_data=(X_valid, y_valid))
 
     # Сохранение обученной сети
-    model.save('ai_int.h5')
+    model.save('ai_int_200_relu.h5')
 if case == 2:
     n = 4  # Номер элемента для проверки
     _, (X_valid, y_valid) = mnist.load_data()
@@ -58,14 +68,14 @@ if case == 2:
     X_valid /= 255
     n_classes = 10
     y_valid = to_categorical(y_valid, n_classes)
-    model = keras.models.load_model('ai_int.h5')
+    model = keras.models.load_model('ai_int_200_relu.h5')
     print(X_valid[n:n+1], type(X_valid[n:n+1]))
     res = model.predict(X_valid[n:n+1]).tolist()
     res = res[0]
     print(f'{y_it} - Это цифра - {res.index(max(res))}')
 
 if case == 3:
-    model = keras.models.load_model('test.h5')
+    model = keras.models.load_model('ai_int_200_relu.h5')
     for i in range(10):
         your_image = f'num/{i}.png'
         # grayscale_image = cv2.imread(your_image, 0)
