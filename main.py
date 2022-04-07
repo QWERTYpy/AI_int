@@ -3,7 +3,7 @@ from keras.datasets import mnist  # Набор цифр
 from keras.models import Sequential  # Простейший тип сети. Вся информация передается только последующему слою
 from keras.layers import Dense, Dropout
 from keras.utils.np_utils import to_categorical
-import tensorflow as tf
+# import tensorflow as tf
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt  # Для отображения
@@ -15,7 +15,7 @@ from keras.layers import Flatten, Conv2D, MaxPooling2D # new!
 # tensorboard = TensorBoard('logs/deep-net')
 
 
-case = int(input('LeNet - 0, Обучить - 1, Проверить - 2 , Свое - 3 :'))
+case = int(input('LeNet - 0, Обучить - 1, Проверить - 2 , Свое - 3 , Le Тест - 4 : '))
 if case == 0:
     (X_train, y_train), (X_valid, y_valid) = mnist.load_data()
 
@@ -136,7 +136,7 @@ if case == 2:
     print(f'{y_it} - Это цифра - {res.index(max(res))}')
 
 if case == 3:
-    model = keras.models.load_model('ai_int_10_lenet.h5')
+    model = keras.models.load_model('ai_int_200_deep.h5')
     for i in range(10):
         your_image = f'num/{i}.png'
         # grayscale_image = cv2.imread(your_image, 0)
@@ -148,6 +148,23 @@ if case == 3:
         plt.show()
         n_image = n_image.reshape(1, 784).astype('float32')
         print(n_image, type(n_image))
+
+        res = model.predict([n_image]).tolist()
+        res = res[0]
+        print(f'Это цифра - {res.index(max(res))}')
+if case == 4:
+    model = keras.models.load_model('ai_int_10_lenet.h5')
+    for i in range(10):
+        your_image = f'num/{i}.png'
+        # grayscale_image = cv2.imread(your_image, 0)
+        color_image = cv2.imread(your_image)
+        gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+        n_image = np.divide(gray_image, 255.0)
+
+        plt.imshow(n_image, cmap='Greys')
+        plt.show()
+        n_image = n_image.reshape(1, 28, 28, 1).astype('float32')
+        #print(n_image, type(n_image))
 
         res = model.predict([n_image]).tolist()
         res = res[0]
