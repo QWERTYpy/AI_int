@@ -1,18 +1,55 @@
 import keras  # Для создания нейронной сети
 from keras.datasets import mnist  # Набор цифр
 from keras.models import Sequential  # Простейший тип сети. Вся информация передается только последующему слою
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from keras.utils.np_utils import to_categorical
 import tensorflow as tf
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt  # Для отображения
 
-from keras.layers import Dropout
 from keras.layers import BatchNormalization
+from keras.layers import Flatten, Conv2D, MaxPooling2D # new!
+
+# from keras.callbacks import TensorBoard
+# tensorboard = TensorBoard('logs/deep-net')
 
 
-case = int(input('Обучить - 1, Проверить - 2 , Свое - 3 :'))
+case = int(input('LeNet - 0, Обучить - 1, Проверить - 2 , Свое - 3 :'))
+if case == 0:
+    (X_train, y_train), (X_valid, y_valid) = mnist.load_data()
+
+    X_train = X_train.reshape(60000, 28, 28, 1).astype('float32')
+    X_valid = X_valid.reshape(10000, 28, 28, 1).astype('float32')
+
+    X_train /= 255
+    X_valid /= 255
+
+    n_classes = 10
+    y_train = to_categorical(y_train, n_classes)
+    y_valid = to_categorical(y_valid, n_classes)
+
+    model = Sequential()
+    # первый сверточный слой:
+    model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)))
+
+    # второй сверточный слой с субдискретизацией и прореживанием:
+    model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())  # преобразует трехмерную карту активаций, сгенерированную слоем Conv2D(), в одномерный массив
+
+    # полносвязанный скрытый слой с прореживанием:
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+
+    # выходной слой:
+    model.add(Dense(n_classes, activation='softmax'))
+
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.fit(X_train, y_train, batch_size=128, epochs=10, verbose=1, validation_data=(X_valid, y_valid))
+
+    model.save('ai_int_10_lenet.h5')
 if case == 1:
     (X_train, y_train), (X_valid, y_valid) = mnist.load_data()
     # Вывод блока ознакомления
@@ -76,6 +113,7 @@ if case == 1:
     model.add(Dense(10, activation='softmax'))
 
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # model.fit(X_train, y_train, batch_size=128, epochs=20, verbose=1, validation_data=(X_valid, y_valid), callbacks=[tensorboard])
     model.fit(X_train, y_train, batch_size=128, epochs=20, verbose=1, validation_data=(X_valid, y_valid))
 
 
@@ -98,7 +136,7 @@ if case == 2:
     print(f'{y_it} - Это цифра - {res.index(max(res))}')
 
 if case == 3:
-    model = keras.models.load_model('ai_int_200_deep.h5')
+    model = keras.models.load_model('ai_int_10_lenet.h5')
     for i in range(10):
         your_image = f'num/{i}.png'
         # grayscale_image = cv2.imread(your_image, 0)
