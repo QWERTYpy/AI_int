@@ -3,7 +3,7 @@ from keras.datasets import mnist  # Набор цифр
 from keras.models import Sequential  # Простейший тип сети. Вся информация передается только последующему слою
 from keras.layers import Dense, Dropout
 from keras.utils.np_utils import to_categorical
-# import tensorflow as tf
+import tensorflow as tf
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt  # Для отображения
